@@ -42,6 +42,9 @@ func (app *application) mount() http.Handler {
 		r.Route("/record", func(r chi.Router) {
 			r.Post("/", app.createRecordHandler)
 		})
+		r.Route("/ping/end-meeting", func(r chi.Router) {
+			r.Post("/", app.endMeetingHandler)
+		})
 	})
 
 	return r

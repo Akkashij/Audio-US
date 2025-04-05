@@ -17,6 +17,10 @@ type CreateRecordPayload struct {
 	EndRecordedAt time.Time `json:"end_recorded_at" validate:"required"`
 }
 
+type EndMeetingPayload struct {
+	MeetingID int64 `json:"meeting_id" validate:"required"`
+}
+
 func (app *application) createRecordHandler(w http.ResponseWriter, r *http.Request) {
 	var payload CreateRecordPayload
 	if err := readJSON(w, r, &payload); err != nil {
@@ -50,4 +54,35 @@ func (app *application) createRecordHandler(w http.ResponseWriter, r *http.Reque
 		app.internalServerError(w, r, err)
 		return
 	}
+}
+
+func (app *application) endMeetingHandler(w http.ResponseWriter, r *http.Request) {
+	var payload EndMeetingPayload
+	if err := readJSON(w, r, &payload); err != nil {
+		app.badRequestError(w, r, err)
+		return
+	}
+
+	if err := Validate.Struct(payload); err != nil {
+		app.badRequestError(w, r, err)
+		return
+	}
+
+	meetingID := payload.MeetingID
+
+	ctx := r.Context()
+
+	texts, err := app.store.Records.GetTextInMeeting(ctx, meetingID)
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	if err := app.jsonResponse(w, http.StatusOK, texts); err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	// TODO: send texts to OpenAI and recive summary
+	// TODO: return summary to client
 }

@@ -17,6 +17,7 @@ type Storage struct {
 	Records interface {
 		Create(context.Context, *Record) error
 		GetByID(context.Context, int64) (*Record, error)
+		GetTextInMeeting(context.Context, int64) ([]string, error)
 	}
 }
 

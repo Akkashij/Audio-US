@@ -59,6 +59,38 @@ func (s *RecordStorage) GetByID(ctx context.Context, id int64) (*Record, error) 
 	return &record, nil
 }
 
+func (s *RecordStorage) GetTextInMeeting(ctx context.Context, meetingID int64) ([]string, error) {
+	query := `
+		SELECT text
+		FROM records
+		WHERE meeting_id = $1
+		ORDER BY recorded_at ASC
+	`
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeOutDuration)
+	defer cancel()
+
+	var texts []string
+	rows, err := s.db.QueryContext(ctx, query, meetingID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var text string
+		if err := rows.Scan(&text); err != nil {
+			return nil, err
+		}
+		texts = append(texts, text)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return texts, nil
+}
+
 func (s *RecordStorage) Create(ctx context.Context, record *Record) error {
 	query := `
 		INSERT INTO records (user_id, audio_id, audio_code, meeting_id, text, recorded_at, end_recorded_at)
