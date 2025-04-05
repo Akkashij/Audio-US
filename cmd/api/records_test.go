@@ -10,6 +10,7 @@ func createDummyRecordPayload() CreateRecordPayload {
 	now := time.Now()
 	return CreateRecordPayload{
 		UserID:        1,
+		MeetingID:     100,
 		AudioID:       100,
 		AudioCode:     "AUDIO_001",
 		Text:          "This is a sample transcribed text",
@@ -20,7 +21,7 @@ func createDummyRecordPayload() CreateRecordPayload {
 
 func TestCreateRecordPayloadSerialization(t *testing.T) {
 	dummy := createDummyRecordPayload()
-	
+
 	// Test JSON serialization
 	jsonData, err := json.Marshal(dummy)
 	if err != nil {

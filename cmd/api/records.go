@@ -9,6 +9,7 @@ import (
 
 type CreateRecordPayload struct {
 	UserID        int64     `json:"user_id" validate:"required"`
+	MeetingID     int64     `json:"meeting_id" validate:"required"`
 	AudioID       int64     `json:"audio_id" validate:"required"`
 	AudioCode     string    `json:"audio_code" validate:"required"`
 	Text          string    `json:"text" validate:"required"`
@@ -35,6 +36,7 @@ func (app *application) createRecordHandler(w http.ResponseWriter, r *http.Reque
 		RecordedAt:    payload.RecordedAt,
 		EndRecordedAt: payload.EndRecordedAt,
 		UserID:        payload.UserID,
+		MeetingID:     payload.MeetingID,
 	}
 
 	ctx := r.Context()
