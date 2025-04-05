@@ -24,3 +24,11 @@ down:
 .PHONY: seed
 seed:
 	@go run cmd/migrate/seed/main.go
+
+.PHONY: test
+test:
+	@go test ./... -v
+
+.PHONY: test-coverage
+test-coverage:
+	@go test ./... -v -cover

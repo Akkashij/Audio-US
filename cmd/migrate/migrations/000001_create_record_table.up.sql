@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS records (
+	id SERIAL PRIMARY KEY,
+	user_id BIGINT NOT NULL,
+	audio_id BIGINT NOT NULL,
+	audio_code VARCHAR(255) NOT NULL,
+	text TEXT NOT NULL,
+	recorded_at TIMESTAMP NOT NULL,
+	end_recorded_at TIMESTAMP NOT NULL
+);

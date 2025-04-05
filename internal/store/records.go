@@ -23,7 +23,7 @@ type RecordStorage struct {
 
 func (s *RecordStorage) GetByID(ctx context.Context, id int64) (*Record, error) {
 	query := `
-		SELECT id, content, audio_id, audio_code, text, recorded_at, end_recorded_at
+		SELECT id, user_id, audio_id, audio_code, text, recorded_at, end_recorded_at
 		FROM records
 		WHERE id = $1
 	`
@@ -37,6 +37,7 @@ func (s *RecordStorage) GetByID(ctx context.Context, id int64) (*Record, error) 
 		id,
 	).Scan(
 		&record.ID,
+		&record.UserID,
 		&record.AudioID,
 		&record.AudioCode,
 		&record.Text,
@@ -57,6 +58,28 @@ func (s *RecordStorage) GetByID(ctx context.Context, id int64) (*Record, error) 
 }
 
 func (s *RecordStorage) Create(ctx context.Context, record *Record) error {
+	query := `
+		INSERT INTO records (user_id, audio_id, audio_code, text, recorded_at, end_recorded_at)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING id
+	`
+	ctx, cancel := context.WithTimeout(ctx, QueryTimeOutDuration)
+	defer cancel()
+
+	err := s.db.QueryRowContext(
+		ctx,
+		query,
+		record.UserID,
+		record.AudioID,
+		record.AudioCode,
+		record.Text,
+		record.RecordedAt,
+		record.EndRecordedAt,
+	).Scan(&record.ID)
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

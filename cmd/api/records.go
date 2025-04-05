@@ -1,55 +1,19 @@
 package main
 
 import (
-	"context"
-	"errors"
 	"net/http"
-	"strconv"
+	"time"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/thiendsu2303/audio-us-backend/internal/store"
 )
 
-type recordKey string
-
-const recordCtx recordKey = "record"
-
 type CreateRecordPayload struct {
-	Text string `json:"text" validate:"required"`
-}
-
-func (app *application) recordsContextMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		idParam := chi.URLParam(r, "recordID")
-		id, err := strconv.ParseInt(idParam, 10, 64)
-		if err != nil {
-			app.internalServerError(w, r, err)
-			return
-		}
-		ctx := r.Context()
-
-		record, err := app.store.Records.GetByID(ctx, id)
-		if err != nil {
-			switch {
-			case errors.Is(err, store.ErrNotFound):
-				app.notFoundResponse(w, r, err)
-				return
-			default:
-				app.internalServerError(w, r, err)
-				return
-			}
-		}
-
-		ctx = context.WithValue(ctx, recordCtx, record)
-		r = r.WithContext(ctx)
-		next.ServeHTTP(w, r)
-	})
-}
-
-func getRecordFromCtx(r *http.Request) *store.Record {
-	ctx := r.Context()
-	record, _ := ctx.Value(recordCtx).(*store.Record)
-	return record
+	UserID        int64     `json:"user_id" validate:"required"`
+	AudioID       int64     `json:"audio_id" validate:"required"`
+	AudioCode     string    `json:"audio_code" validate:"required"`
+	Text          string    `json:"text" validate:"required"`
+	RecordedAt    time.Time `json:"recorded_at" validate:"required"`
+	EndRecordedAt time.Time `json:"end_recorded_at" validate:"required"`
 }
 
 func (app *application) createRecordHandler(w http.ResponseWriter, r *http.Request) {
@@ -65,8 +29,12 @@ func (app *application) createRecordHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	record := &store.Record{
-		Text:   payload.Text,
-		UserID: 1,
+		Text:          payload.Text,
+		AudioID:       payload.AudioID,
+		AudioCode:     payload.AudioCode,
+		RecordedAt:    payload.RecordedAt,
+		EndRecordedAt: payload.EndRecordedAt,
+		UserID:        payload.UserID,
 	}
 
 	ctx := r.Context()

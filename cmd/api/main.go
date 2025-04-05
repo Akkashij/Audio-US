@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	_ "github.com/lib/pq" // postgres driver
 	"github.com/thiendsu2303/audio-us-backend/internal/db"
 	"github.com/thiendsu2303/audio-us-backend/internal/env"
 	"github.com/thiendsu2303/audio-us-backend/internal/store"
@@ -14,7 +15,7 @@ func main() {
 	cfg := config{
 		addr: env.GetString("ADDR", ":6065"),
 		db: dbConfig{
-			addr:         env.GetString("DB_ADDR", "postgres://adminaudioai:audious@localhost/audioai?sslmode=disable"),
+			addr:         env.GetString("DB_ADDR", "postgres://adminaudioai:audious@localhost:5435/audioai?sslmode=disable"),
 			maxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 30),
 			maxIdleConns: env.GetInt("DB_MAX_IDLE_CONNS", 30),
 			maxIdleTime:  env.GetString("DB_MAX_IDLE_TIME", "15m"),
