@@ -50,6 +50,9 @@ func (app *application) createRecordHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	// Broadcast the new record to WebSocket clients in the same meeting
+	app.hub.BroadcastToMeeting(record.MeetingID, record)
+
 	if err := app.jsonResponse(w, http.StatusCreated, record); err != nil {
 		app.internalServerError(w, r, err)
 		return

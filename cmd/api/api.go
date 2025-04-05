@@ -7,12 +7,15 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/thiendsu2303/audio-us-backend/internal/store"
+	"github.com/thiendsu2303/audio-us-backend/internal/websocket"
 )
 
 type application struct {
 	config config
 	store  store.Storage
+	hub    *websocket.Hub
 }
 
 type config struct {
@@ -36,9 +39,22 @@ func (app *application) mount() http.Handler {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Timeout(60 * time.Second))
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
+
+	r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "test-websocket.html")
+	})
 
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthCheck)
+		r.Get("/ws", app.handleWebSocket)
 		r.Route("/record", func(r chi.Router) {
 			r.Post("/", app.createRecordHandler)
 		})

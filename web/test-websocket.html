@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #messages { 
+            border: 1px solid #ccc; 
+            padding: 10px; 
+            height: 300px; 
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        .record { margin-bottom: 10px; }
+        input, button { margin: 5px; padding: 5px; }
+        #form { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h2>WebSocket Test</h2>
+    <div>
+        <label>Meeting ID:</label>
+        <input type="number" id="meetingId" value="1" />
+        <button onclick="connect()">Connect WebSocket</button>
+        <span id="status">Disconnected</span>
+    </div>
+    <div id="messages"></div>
+    <div id="form">
+        <h3>Create New Record</h3>
+        <div>
+            <input type="text" id="text" placeholder="Text" />
+            <input type="number" id="audioId" placeholder="Audio ID" value="1" />
+            <input type="text" id="audioCode" placeholder="Audio Code" value="TEST001" />
+            <button onclick="createRecord()">Create Record</button>
+        </div>
+    </div>
+
+    <script>
+        let ws;
+        const messagesDiv = document.getElementById('messages');
+        const statusSpan = document.getElementById('status');
+
+        function connect() {
+            const meetingId = document.getElementById('meetingId').value;
+            ws = new WebSocket(`ws://localhost:6065/v1/ws?meeting_id=${meetingId}`);
+            
+            ws.onopen = () => {
+                statusSpan.textContent = 'Connected';
+                statusSpan.style.color = 'green';
+            };
+
+            ws.onclose = () => {
+                statusSpan.textContent = 'Disconnected';
+                statusSpan.style.color = 'red';
+            };
+
+            ws.onmessage = (event) => {
+                const record = JSON.parse(event.data);
+                const recordDiv = document.createElement('div');
+                recordDiv.className = 'record';
+                recordDiv.innerHTML = `
+                    <strong>New Record:</strong><br>
+                    Text: ${record.Text}<br>
+                    Audio ID: ${record.AudioID}<br>
+                    Audio Code: ${record.AudioCode}<br>
+                    Meeting ID: ${record.MeetingID}<br>
+                    Timestamp: ${new Date(record.RecordedAt).toLocaleString()}
+                `;
+                messagesDiv.appendChild(recordDiv);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            };
+        }
+
+        function createRecord() {
+            const meetingId = document.getElementById('meetingId').value;
+            const text = document.getElementById('text').value;
+            const audioId = document.getElementById('audioId').value;
+            const audioCode = document.getElementById('audioCode').value;
+            
+            const now = new Date();
+            const payload = {
+                meeting_id: parseInt(meetingId),
+                user_id: 1,
+                audio_id: parseInt(audioId),
+                audio_code: audioCode,
+                text: text,
+                recorded_at: now.toISOString(),
+                end_recorded_at: now.toISOString()
+            };
+
+            fetch('http://localhost:6065/v1/record', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('text').value = '';
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

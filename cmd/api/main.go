@@ -7,6 +7,7 @@ import (
 	"github.com/thiendsu2303/audio-us-backend/internal/db"
 	"github.com/thiendsu2303/audio-us-backend/internal/env"
 	"github.com/thiendsu2303/audio-us-backend/internal/store"
+	"github.com/thiendsu2303/audio-us-backend/internal/websocket"
 )
 
 const version = "0.0.1"
@@ -38,9 +39,13 @@ func main() {
 
 	store := store.NewStorage(db)
 
+	hub := websocket.NewHub()
+	go hub.Run()
+
 	app := &application{
 		config: cfg,
 		store:  store,
+		hub:    hub,
 	}
 
 	mux := app.mount()
