@@ -49,7 +49,7 @@ func (app *application) mount() http.Handler {
 	}))
 
 	r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "test-websocket.html")
+		http.ServeFile(w, r, "web/websocket.html")
 	})
 
 	r.Route("/v1", func(r chi.Router) {
