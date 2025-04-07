@@ -123,8 +123,13 @@ body {
     overflow-y: auto;
 }
 
-#questionInput {
+#questionInputContainer {
     width: 100%;
+    display: flex;
+}
+
+#questionInput {
+    flex: 1;
     height: 100px;
     padding: 10px;
     border: 1px solid #ddd;
