@@ -61,7 +61,15 @@ function connectToChat() {
         
         const messageBubble = document.createElement('div');
         messageBubble.className = 'message-bubble';
-        messageBubble.textContent = record.Text;
+        
+        // Split text into words and create spans
+        const words = record.Text.split(/\s+/);
+        words.forEach((word, index) => {
+            const wordSpan = document.createElement('span');
+            wordSpan.className = 'word-animation';
+            wordSpan.textContent = word + (index < words.length - 1 ? ' ' : '');
+            messageBubble.appendChild(wordSpan);
+        });
         
         const messageInfo = document.createElement('div');
         messageInfo.className = 'message-info';
@@ -72,9 +80,19 @@ function connectToChat() {
         messageContent.appendChild(messageInfo);
         messageDiv.appendChild(messageContent);
         
-        // Thêm vào khung chat
+        // Add to chat container with animation
         messagesDiv.appendChild(messageDiv);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        // Animate words one by one
+        const wordSpans = messageBubble.querySelectorAll('.word-animation');
+        const animationDelay = 50; // milliseconds between each word
+
+        wordSpans.forEach((span, index) => {
+            setTimeout(() => {
+                span.classList.add('visible');
+            }, index * animationDelay);
+        });
     };
 }
 
