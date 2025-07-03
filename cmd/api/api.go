@@ -1,13 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/joho/godotenv"
+	"github.com/thiendsu2303/audio-us-backend/internal/auth"
 	"github.com/thiendsu2303/audio-us-backend/internal/store"
 	"github.com/thiendsu2303/audio-us-backend/internal/websocket"
 )
@@ -32,6 +36,9 @@ type dbConfig struct {
 }
 
 func (app *application) mount() http.Handler {
+	if err := godotenv.Load(); err != nil {
+		log.Printf("Warning: .env file not found: %v", err)
+	}
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -53,13 +60,41 @@ func (app *application) mount() http.Handler {
 	})
 
 	r.Route("/v1", func(r chi.Router) {
+		// Create JWT middleware
+		jwtMiddleware := auth.NewAuthMiddleware(os.Getenv("JWT_SECRET"))
+
 		r.Get("/health", app.healthCheck)
 		r.Get("/ws", app.handleWebSocket)
+
 		r.Route("/record", func(r chi.Router) {
+			r.Use(jwtMiddleware.JWTAuth)
 			r.Post("/", app.createRecordHandler)
 		})
+
 		r.Route("/ping/end-meeting", func(r chi.Router) {
+			r.Use(jwtMiddleware.JWTAuth)
 			r.Post("/", app.endMeetingHandler)
+		})
+
+		r.Route("/auth", func(r chi.Router) {
+			// Create Discord auth handler
+			discordHandler := auth.NewDiscordAuthHandler(
+				os.Getenv("DISCORD_CLIENT_ID"),
+				os.Getenv("DISCORD_CLIENT_SECRET"),
+				os.Getenv("DISCORD_REDIRECT_URI"),
+				os.Getenv("JWT_SECRET"),
+			)
+
+			r.Get("/login", func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(map[string]string{
+					"login_url": discordHandler.GetLoginURL(),
+				})
+			})
+
+			r.Post("/callback", func(w http.ResponseWriter, r *http.Request) {
+				discordHandler.HandleCallback(w, r)
+			})
 		})
 	})
 

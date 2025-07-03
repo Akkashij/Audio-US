@@ -8,11 +8,17 @@ import (
 	"github.com/thiendsu2303/audio-us-backend/internal/env"
 	"github.com/thiendsu2303/audio-us-backend/internal/store"
 	"github.com/thiendsu2303/audio-us-backend/internal/websocket"
+	"github.com/joho/godotenv"
 )
 
 const version = "0.0.1"
 
 func main() {
+	// Load environment variables from .env file
+	if err := godotenv.Load(); err != nil {
+		log.Printf("Warning: .env file not found: %v", err)
+	}
+
 	cfg := config{
 		addr: env.GetString("ADDR", ":6065"),
 		db: dbConfig{
