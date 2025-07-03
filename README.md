@@ -37,6 +37,12 @@ This will start:
 - Backend service
 
 ### 4. Run Migrations
+First, ensure you have the PostgreSQL driver installed:
+```bash
+go get github.com/lib/pq
+```
+
+Then run the migrations:
 ```bash
 go run cmd/migrate/main.go up
 ```
