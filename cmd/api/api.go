@@ -67,7 +67,6 @@ func (app *application) mount() http.Handler {
 		r.Get("/ws", app.handleWebSocket)
 
 		r.Route("/record", func(r chi.Router) {
-			r.Use(jwtMiddleware.JWTAuth)
 			r.Post("/", app.createRecordHandler)
 		})
 

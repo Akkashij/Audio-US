@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	discordAuthURL = "https://discord.com/api/oauth2/authorize"
+	discordAuthURL  = "https://discord.com/api/oauth2/authorize"
 	discordTokenURL = "https://discord.com/api/oauth2/token"
 	discordUserURL  = "https://discord.com/api/users/@me"
 )
@@ -26,6 +26,10 @@ type DiscordConfig struct {
 type DiscordAuthHandler struct {
 	config DiscordConfig
 	secret string
+}
+
+type AuthCodeRequest struct {
+	Code string `json:"code"`
 }
 
 func NewDiscordAuthHandler(clientID, clientSecret, redirectURI, secret string) *DiscordAuthHandler {
@@ -52,8 +56,12 @@ func (h *DiscordAuthHandler) GetLoginURL() string {
 }
 
 func (h *DiscordAuthHandler) HandleCallback(w http.ResponseWriter, r *http.Request) {
-	code := r.FormValue("code")
-	if code == "" {
+	var req AuthCodeRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if req.Code == "" {
 		http.Error(w, "Missing code parameter", http.StatusBadRequest)
 		return
 	}
@@ -63,7 +71,7 @@ func (h *DiscordAuthHandler) HandleCallback(w http.ResponseWriter, r *http.Reque
 	tokenParams.Add("client_id", h.config.ClientID)
 	tokenParams.Add("client_secret", h.config.ClientSecret)
 	tokenParams.Add("grant_type", "authorization_code")
-	tokenParams.Add("code", code)
+	tokenParams.Add("code", req.Code)
 	tokenParams.Add("redirect_uri", h.config.RedirectURI)
 
 	tokenResp, err := http.PostForm(discordTokenURL, tokenParams)
@@ -90,8 +98,8 @@ func (h *DiscordAuthHandler) HandleCallback(w http.ResponseWriter, r *http.Reque
 	defer userInfoResp.Body.Close()
 
 	var userData struct {
-		ID    string `json:"id"`
-		Email string `json:"email"`
+		ID       string `json:"id"`
+		Email    string `json:"email"`
 		Username string `json:"username"`
 	}
 	if err := json.NewDecoder(userInfoResp.Body).Decode(&userData); err != nil {
@@ -101,10 +109,10 @@ func (h *DiscordAuthHandler) HandleCallback(w http.ResponseWriter, r *http.Reque
 
 	// Create JWT token
 	claims := jwt.MapClaims{
-		"user_id":    userData.ID,
-		"email":      userData.Email,
-		"username":   userData.Username,
-		"exp":        time.Now().Add(24 * time.Hour).Unix(),
+		"user_id":  userData.ID,
+		"email":    userData.Email,
+		"username": userData.Username,
+		"exp":      time.Now().Add(24 * time.Hour).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
