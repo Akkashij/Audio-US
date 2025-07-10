@@ -18,9 +18,9 @@ var upgrader = websocket.Upgrader{
 }
 
 type Client struct {
-	hub      *Hub
-	conn     *websocket.Conn
-	send     chan []byte
+	hub       *Hub
+	conn      *websocket.Conn
+	send      chan []byte
 	meetingID int64
 }
 
@@ -123,9 +123,9 @@ func (h *Hub) ServeWs(w http.ResponseWriter, r *http.Request, meetingID int64) {
 	}
 
 	client := &Client{
-		hub:      h,
-		conn:     conn,
-		send:     make(chan []byte, 256),
+		hub:       h,
+		conn:      conn,
+		send:      make(chan []byte, 256),
 		meetingID: meetingID,
 	}
 	client.hub.register <- client

@@ -18,6 +18,7 @@ type CreateRecordPayload struct {
 }
 
 type EndMeetingPayload struct {
+	UserID    int64 `json:"user_id"`
 	MeetingID int64 `json:"meeting_id" validate:"required"`
 }
 
@@ -72,6 +73,7 @@ func (app *application) endMeetingHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	meetingID := payload.MeetingID
+	userID := payload.UserID
 
 	ctx := r.Context()
 
@@ -81,11 +83,13 @@ func (app *application) endMeetingHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err := app.jsonResponse(w, http.StatusOK, texts); err != nil {
+	// Return all records for the meeting, including user_id and meeting_id
+	if err := app.jsonResponse(w, http.StatusOK, map[string]interface{}{
+		"user_id":    userID,
+		"meeting_id": meetingID,
+		"texts":      texts,
+	}); err != nil {
 		app.internalServerError(w, r, err)
 		return
 	}
-
-	// TODO: send texts to OpenAI and recive summary
-	// TODO: return summary to client
 }

@@ -60,8 +60,6 @@ func (app *application) mount() http.Handler {
 	})
 
 	r.Route("/v1", func(r chi.Router) {
-		// Create JWT middleware
-		jwtMiddleware := auth.NewAuthMiddleware(os.Getenv("JWT_SECRET"))
 
 		r.Get("/health", app.healthCheck)
 		r.Get("/ws", app.handleWebSocket)
@@ -71,7 +69,6 @@ func (app *application) mount() http.Handler {
 		})
 
 		r.Route("/ping/end-meeting", func(r chi.Router) {
-			r.Use(jwtMiddleware.JWTAuth)
 			r.Post("/", app.endMeetingHandler)
 		})
 
@@ -91,9 +88,7 @@ func (app *application) mount() http.Handler {
 				})
 			})
 
-			r.Post("/callback", func(w http.ResponseWriter, r *http.Request) {
-				discordHandler.HandleCallback(w, r)
-			})
+			r.Post("/callback", app.discordCallbackHandler)
 		})
 	})
 
