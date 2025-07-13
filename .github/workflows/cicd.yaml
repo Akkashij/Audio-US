@@ -48,3 +48,4 @@ jobs:
             --project ${{ env.PROJECT_ID }} \
             --platform managed \
             --allow-unauthenticated
+            --service-account=thesis21kdl@thesis21kdl.iam.gserviceaccount.com
