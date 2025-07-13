@@ -20,7 +20,7 @@ func main() {
 	}
 
 	cfg := config{
-		addr: env.GetString("ADDR", ":6065"),
+		addr: ":" + env.GetString("PORT", "6065"),
 		db: dbConfig{
 			addr:         env.GetString("DB_ADDR", "postgres://adminaudioai:audious@localhost:5435/audioai?sslmode=disable"),
 			maxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 30),
