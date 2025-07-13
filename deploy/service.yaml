@@ -51,12 +51,6 @@ spec:
           initialDelaySeconds: 20
           periodSeconds: 60
           timeoutSeconds: 5
-        readinessProbe:
-          httpGet:
-            path: /v1/health
-            port: 6065
-          periodSeconds: 30
-          timeoutSeconds: 3
   traffic:
   - percent: 100
     latestRevision: true
