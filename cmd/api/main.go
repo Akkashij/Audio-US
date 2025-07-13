@@ -34,6 +34,7 @@ func main() {
 
 	cfg := config{
 		addr: os.Getenv("ADDR"),
+
 		db: dbConfig{
 			addr:         os.Getenv("DB_ADDR"),
 			maxOpenConns: getenvIntWithDefault("DB_MAX_OPEN_CONNS", 30),
