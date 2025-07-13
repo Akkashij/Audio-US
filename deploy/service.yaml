@@ -24,8 +24,6 @@ spec:
         - name: http1
           containerPort: 6065
         env:
-        - name: PORT
-          value: "6065"
         - name: ENV
           value: "production"
         - name: DB_ADDR
