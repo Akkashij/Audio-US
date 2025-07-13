@@ -1,4 +1,4 @@
-name: Deploy Service Backend to Cloud Run 
+name: Deploy to Cloud Run
 
 env:
   SERVICE_NAME: audio-us-backend
@@ -37,15 +37,9 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ${{ env.DOCKER_IMAGE_URL }}:latest .
+          docker build -t ${{ env.DOCKER_IMAGE_URL }}:latest -f Dockerfile .
           docker push ${{ env.DOCKER_IMAGE_URL }}:latest
 
-      - name: Deploy Service Backend to Cloud Run 
+      - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image ${{ env.DOCKER_IMAGE_URL }}:latest \
-            --region ${{ env.REGION }} \
-            --project ${{ env.PROJECT_ID }} \
-            --platform managed \
-            --allow-unauthenticated \
-            --service-account=thesis21kdl@thesis21kdl.iam.gserviceaccount.com
+          gcloud run services replace deploy/service.yaml
