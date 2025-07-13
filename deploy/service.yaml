@@ -23,20 +23,6 @@ spec:
         ports:
         - name: http1
           containerPort: 6065
-        env:
-        - name: ENV
-          value: "production"
-        - name: DB_ADDR
-          valueFrom:
-            secretKeyRef:
-              name: audio-us-backend-secrets
-              key: database-url
-        - name: DB_MAX_OPEN_CONNS
-          value: "10"
-        - name: DB_MAX_IDLE_CONNS
-          value: "5"
-        - name: DB_MAX_IDLE_TIME
-          value: "15m"
         resources:
           limits:
             cpu: 1000m
