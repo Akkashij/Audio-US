@@ -37,9 +37,14 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ${{ env.DOCKER_IMAGE_URL }}:latest -f Dockerfile_gpu .
+          docker build -t ${{ env.DOCKER_IMAGE_URL }}:latest .
           docker push ${{ env.DOCKER_IMAGE_URL }}:latest
 
-      - name: Deploy to Cloud Run with GPU
+      - name: Deploy Service Backend to Cloud Run 
         run: |
-          gcloud run services replace deploy/service.yaml
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image ${{ env.DOCKER_IMAGE_URL }}:latest \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }} \
+            --platform managed \
+            --allow-unauthenticated
