@@ -9,9 +9,8 @@ import (
 
 type CreateRecordPayload struct {
 	UserID        int64     `json:"user_id" validate:"required"`
+	UserName      string    `json:"user_name" validate:"required"`
 	MeetingID     int64     `json:"meeting_id" validate:"required"`
-	AudioID       int64     `json:"audio_id" validate:"required"`
-	AudioCode     string    `json:"audio_code" validate:"required"`
 	Text          string    `json:"text" validate:"required"`
 	RecordedAt    time.Time `json:"recorded_at" validate:"required"`
 	EndRecordedAt time.Time `json:"end_recorded_at" validate:"required"`
@@ -36,11 +35,10 @@ func (app *application) createRecordHandler(w http.ResponseWriter, r *http.Reque
 
 	record := &store.Record{
 		Text:          payload.Text,
-		AudioID:       payload.AudioID,
-		AudioCode:     payload.AudioCode,
 		RecordedAt:    payload.RecordedAt,
 		EndRecordedAt: payload.EndRecordedAt,
 		UserID:        payload.UserID,
+		UserName:      payload.UserName,
 		MeetingID:     payload.MeetingID,
 	}
 

@@ -10,8 +10,7 @@ import (
 type Record struct {
 	ID            int64
 	UserID        int64
-	AudioID       int64
-	AudioCode     string
+	UserName      string
 	MeetingID     int64
 	Text          string
 	RecordedAt    time.Time
@@ -24,7 +23,7 @@ type RecordStorage struct {
 
 func (s *RecordStorage) GetByID(ctx context.Context, id int64) (*Record, error) {
 	query := `
-		SELECT id, user_id, audio_id, audio_code, meeting_id, text, recorded_at, end_recorded_at
+		SELECT id, user_id, user_name, meeting_id, text, recorded_at, end_recorded_at
 		FROM records
 		WHERE id = $1
 	`
@@ -39,8 +38,7 @@ func (s *RecordStorage) GetByID(ctx context.Context, id int64) (*Record, error) 
 	).Scan(
 		&record.ID,
 		&record.UserID,
-		&record.AudioID,
-		&record.AudioCode,
+		&record.UserName,
 		&record.MeetingID,
 		&record.Text,
 		&record.RecordedAt,
@@ -93,8 +91,8 @@ func (s *RecordStorage) GetTextInMeeting(ctx context.Context, meetingID int64) (
 
 func (s *RecordStorage) Create(ctx context.Context, record *Record) error {
 	query := `
-		INSERT INTO records (user_id, audio_id, audio_code, meeting_id, text, recorded_at, end_recorded_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO records (user_id, user_name, meeting_id, text, recorded_at, end_recorded_at)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id
 	`
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeOutDuration)
@@ -104,8 +102,7 @@ func (s *RecordStorage) Create(ctx context.Context, record *Record) error {
 		ctx,
 		query,
 		record.UserID,
-		record.AudioID,
-		record.AudioCode,
+		record.UserName,
 		record.MeetingID,
 		record.Text,
 		record.RecordedAt,

@@ -10,9 +10,8 @@ func createDummyRecordPayload() CreateRecordPayload {
 	now := time.Now()
 	return CreateRecordPayload{
 		UserID:        1,
+		UserName:      "Test User",
 		MeetingID:     100,
-		AudioID:       100,
-		AudioCode:     "AUDIO_001",
 		Text:          "This is a sample transcribed text",
 		RecordedAt:    now,
 		EndRecordedAt: now.Add(time.Minute * 5),
