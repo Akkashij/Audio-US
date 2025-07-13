@@ -2,16 +2,29 @@ package main
 
 import (
 	"log"
+	"os"
+	"strconv"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq" // postgres driver
 	"github.com/thiendsu2303/audio-us-backend/internal/db"
-	"github.com/thiendsu2303/audio-us-backend/internal/env"
 	"github.com/thiendsu2303/audio-us-backend/internal/store"
 	"github.com/thiendsu2303/audio-us-backend/internal/websocket"
-	"github.com/joho/godotenv"
 )
 
 const version = "0.0.1"
+
+func getenvIntWithDefault(key string, fallback int) int {
+	val := os.Getenv(key)
+	if val == "" {
+		return fallback
+	}
+	n, err := strconv.Atoi(val)
+	if err != nil {
+		return fallback
+	}
+	return n
+}
 
 func main() {
 	// Load environment variables from .env file
@@ -20,14 +33,14 @@ func main() {
 	}
 
 	cfg := config{
-		addr: env.GetString("ADDR", ":6065"),
+		addr: os.Getenv("ADDR"),
 		db: dbConfig{
-			addr:         env.GetString("DB_ADDR", "postgres://adminaudioai:audious@localhost:5435/audioai?sslmode=disable"),
-			maxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 30),
-			maxIdleConns: env.GetInt("DB_MAX_IDLE_CONNS", 30),
-			maxIdleTime:  env.GetString("DB_MAX_IDLE_TIME", "15m"),
+			addr:         os.Getenv("DB_ADDR"),
+			maxOpenConns: getenvIntWithDefault("DB_MAX_OPEN_CONNS", 30),
+			maxIdleConns: getenvIntWithDefault("DB_MAX_IDLE_CONNS", 30),
+			maxIdleTime:  os.Getenv("DB_MAX_IDLE_TIME"),
 		},
-		env: env.GetString("ENV", "development"),
+		env: os.Getenv("ENV"),
 	}
 
 	db, err := db.New(

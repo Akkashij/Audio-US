@@ -11,8 +11,5 @@ FROM gcr.io/distroless/static-debian11
 WORKDIR /app
 COPY --from=builder /app/main /app/main
 COPY --from=builder /app/cmd/migrate/migrations /app/cmd/migrate/migrations
-# Cloud Run sets $PORT, default to 8080 for local dev
-ENV PORT=8080
-EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=3s CMD ["/app/main", "-healthcheck"]
+EXPOSE 6065
 ENTRYPOINT ["/app/main"] 
