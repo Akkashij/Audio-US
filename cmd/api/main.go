@@ -32,8 +32,15 @@ func main() {
 		log.Printf("Warning: .env file not found: %v", err)
 	}
 
+	// In Cloud Run, use the PORT environment variable if it exists
+	addr := os.Getenv("ADDR")
+	if port := os.Getenv("PORT"); port != "" {
+		addr = ":" + port
+		log.Printf("Using PORT environment variable: %s", addr)
+	}
+
 	cfg := config{
-		addr: os.Getenv("ADDR"),
+		addr: addr,
 
 		db: dbConfig{
 			addr:         os.Getenv("DB_ADDR"),
