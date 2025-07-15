@@ -1,17 +1,15 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:16.3
-    container_name: postgres-db
-    environment:
-      - POSTGRES_USER=adminaudioai
-      - POSTGRES_PASSWORD=audious
-      - POSTGRES_DB=audioai
+  backend:
+    build: .
+    container_name: audio-us-backend
     ports:
-      - 5435:5432
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
+      - "6065:6065"
+    environment:
+      - DB_ADDR=${DB_ADDR}
+      - ADDR=${ADDR}
+      - ENV=${ENV}
+      - DB_MAX_OPEN_CONNS=${DB_MAX_OPEN_CONNS}
+      - DB_MAX_IDLE_CONNS=${DB_MAX_IDLE_CONNS}
+      - DB_MAX_IDLE_TIME=${DB_MAX_IDLE_TIME}
