@@ -39,6 +39,8 @@ spec:
           value: "30"
         - name: DB_MAX_IDLE_TIME
           value: "15m"
+        - name: DISCORD_REDIRECT_URI
+          value: "https://audio-us-front-end.vercel.app/app/redirect"
         - name: DISCORD_CLIENT_ID
           valueFrom:
             secretKeyRef:
