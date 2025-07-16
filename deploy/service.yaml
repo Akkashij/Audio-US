@@ -47,8 +47,6 @@ spec:
             secretKeyRef:
               name: audio-us-backend-discord-client-secret
               key: latest
-        - name: DISCORD_REDIRECT_URI
-          value: "https://your-deployed-url/v1/auth/callback"
         - name: JWT_SECRET
           valueFrom:
             secretKeyRef:
