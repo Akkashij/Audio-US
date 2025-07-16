@@ -29,6 +29,8 @@ spec:
             secretKeyRef:
               name: audio-us-backend-db-addr
               key: latest
+        - name: ADDR
+          value: ":6065"
         - name: ENV
           value: "production"
         - name: DB_MAX_OPEN_CONNS

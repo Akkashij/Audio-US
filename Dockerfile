@@ -13,3 +13,4 @@ COPY --from=builder /app/main /app/main
 COPY --from=builder /app/cmd/migrate/migrations /app/cmd/migrate/migrations
 EXPOSE 6065
 HEALTHCHECK --interval=30s --timeout=3s CMD ["/app/main", "-healthcheck"]
+CMD ["/app/main"]

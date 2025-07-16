@@ -32,11 +32,18 @@ func main() {
 		log.Printf("Warning: .env file not found: %v", err)
 	}
 
-	// In Cloud Run, use the PORT environment variable if it exists
-	addr := os.Getenv("ADDR")
+	// Use PORT environment variable (required for Cloud Run)
+	// Default to ADDR env var or ":6065" if neither is set
+	var addr string
 	if port := os.Getenv("PORT"); port != "" {
 		addr = ":" + port
 		log.Printf("Using PORT environment variable: %s", addr)
+	} else if envAddr := os.Getenv("ADDR"); envAddr != "" {
+		addr = envAddr
+		log.Printf("Using ADDR environment variable: %s", addr)
+	} else {
+		addr = ":6065"
+		log.Printf("No PORT or ADDR specified, defaulting to %s", addr)
 	}
 
 	cfg := config{

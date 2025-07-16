@@ -98,6 +98,11 @@ func (app *application) mount() http.Handler {
 func (app *application) run(
 	r http.Handler,
 ) error {
+	if app.config.addr == "" {
+		app.config.addr = ":6065"
+		log.Printf("WARNING: Empty server address, defaulting to %s", app.config.addr)
+	}
+
 	srv := &http.Server{
 		Addr:         app.config.addr,
 		Handler:      r,
