@@ -1,0 +1,58 @@
+FROM nvidia/cuda:12.6.0-cudnn-runtime-ubuntu22.04
+
+# Set environment variables for non-interactive installs and Python optimizations
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/root/.local/bin:$PATH" \
+    CUDA_HOME="/usr/local/cuda" \
+    LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
+
+# Install Python 3.12 and other dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    software-properties-common \
+    curl \
+    ca-certificates \
+    libsndfile1 \
+    && add-apt-repository ppa:deadsnakes/ppa -y \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+    python3.12 \
+    python3.12-venv \
+    python3.12-dev \
+    python3-pip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create symbolic links for Python
+RUN ln -sf /usr/bin/python3.12 /usr/bin/python && \
+    ln -sf /usr/bin/pip3 /usr/bin/pip
+
+# Install uv
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
+RUN sh /uv-installer.sh && rm /uv-installer.sh
+
+# Set working directory
+WORKDIR /audio-us-model
+
+# Copy project files (excluding .venv via .dockerignore)
+COPY . .
+
+# Remove unnecessary config directory (if it exists)
+RUN rm -rf config || true
+
+# Install all dependencies with uv sync
+RUN uv sync --no-cache
+
+# Expose port for the ASR server (can be overridden at runtime)
+EXPOSE 6066
+
+# Use ENTRYPOINT with CMD to allow for command-line argument passing
+ENTRYPOINT ["uv", "run", "python", "run_audio_model.py"]
+
+# Default args can be overridden at runtime with docker run
+# Read whisperlivekit/model_server.py for more options
+CMD ["--model", "small", "--language", "en", "--task", "transcribe", "--backend", "faster-whisper", \
+     "--buffer-trimming", "segment", "--buffer-trimming-sec", "15", "--min-chunk-size", "0.5", \
+     "--port", "6066", "--host", "0.0.0.0", "--log-level", "INFO"]
