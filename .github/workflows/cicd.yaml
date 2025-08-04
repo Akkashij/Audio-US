@@ -1,0 +1,53 @@
+name: Deploy Discord Bot to Cloud Run
+
+env:
+  SERVICE_NAME: audio-us-discord-bot
+  PROJECT_ID: thesis21kdl
+  DOCKER_IMAGE_URL: asia-southeast1-docker.pkg.dev/thesis21kdl/audio-us-discord-bot/audio-us-discord-bot
+  REGION: asia-southeast1
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  dockerize-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Google Cloud Auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Set up Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      - name: Build and Push Docker Image
+        run: |
+          IMAGE_TAG="${{ github.sha }}"
+          docker build -t ${{ env.DOCKER_IMAGE_URL }}:${IMAGE_TAG} -f Dockerfile .
+          docker build -t ${{ env.DOCKER_IMAGE_URL }}:latest -f Dockerfile .
+          docker push ${{ env.DOCKER_IMAGE_URL }}:${IMAGE_TAG}
+          docker push ${{ env.DOCKER_IMAGE_URL }}:latest
+
+      - name: Update service.yaml with new image tag
+        run: |
+          IMAGE_TAG="${{ github.sha }}"
+          sed -i "s|image: .*|image: ${{ env.DOCKER_IMAGE_URL }}:${IMAGE_TAG}|g" deploy/service.yaml
+
+      - name: Deploy Discord Bot to Cloud Run
+        run: |
+          gcloud run services replace deploy/service.yaml
