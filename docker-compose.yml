@@ -1,0 +1,36 @@
+services:
+  audio-model:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: audio-us-model
+    container_name: audio-model-service
+    ports:
+      - "6066:6066"
+    volumes:
+      # Optional: mount a cache directory to persist model downloads
+      - ./model-cache:/root/.cache/huggingface
+    environment:
+      - MODEL_SIZE=small
+      - LANGUAGE=en
+      - TASK=transcribe
+      - BACKEND=faster-whisper
+      - BUFFER_TRIMMING=segment
+      - BUFFER_TRIMMING_SEC=15
+      - MIN_CHUNK_SIZE=0.5
+      - PORT=6066
+      - HOST=0.0.0.0
+      - LOG_LEVEL=DEBUG  # Set to DEBUG for more verbose output
+    restart: unless-stopped
+    # Uncomment below for GPU support if needed
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    #     # Optional: uncomment to set additional resource limits
+    #     # limits:
+    #     #   cpus: '2'
+    #     #   memory: 4G

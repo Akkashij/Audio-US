@@ -1,0 +1,41 @@
+# Use the official Python 3.12 slim image based on Debian Bookworm
+FROM python:3.12-slim-bookworm
+
+# Set environment variables for non-interactive installs and Python optimizations
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/root/.local/bin:$PATH"
+
+# Install curl and ca-certificates, then clean up to reduce image size
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl ca-certificates && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install uv
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
+RUN sh /uv-installer.sh && rm /uv-installer.sh
+
+# Set working directory
+WORKDIR /audio-us-model
+
+# Copy project files (excluding .venv via .dockerignore)
+COPY . .
+
+# Remove unnecessary config directory (if it exists)
+RUN rm -rf config || true
+
+RUN uv sync --no-cache
+
+# Expose port for the ASR server (can be overridden at runtime)
+EXPOSE 6066
+
+# Use ENTRYPOINT with CMD to allow for command-line argument passing
+ENTRYPOINT ["uv", "run", "python", "run_audio_model.py"]
+
+# Default args can be overridden at runtime with docker run
+# Read whisperlivekit/model_server.py for more options
+CMD ["--model", "small", "--language", "en", "--task", "transcribe", "--backend", "faster-whisper", \
+     "--buffer-trimming", "segment", "--buffer-trimming-sec", "15", "--min-chunk-size", "0.5", \
+     "--port", "6066", "--host", "0.0.0.0", "--log-level", "INFO"]

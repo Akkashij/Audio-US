@@ -1,0 +1,23 @@
+[project]
+name = "audio-us-model"
+version = "0.1.0"
+description = "Container for transcript model"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "setuptools",
+    "fastapi>=0.115.12",
+    "faster-whisper>=1.1.1",
+    "numpy>=2.2.5",
+    "pyngrok>=7.2.5",
+    "torch>=2.3.1",  # CUDA 12.6 and Python 3.12 compatible
+    "torchaudio>=2.3.1",  # CUDA 12.6 and Python 3.12 compatible
+    "uvicorn>=0.34.2",
+    "librosa",
+    "websockets>=15.0.1",
+    "soundfile",
+    "ctranslate2>=3.22.0",  # Added for better CUDA support with faster-whisper
+]
+
+[tool.pip]
+extra-index-url = ["https://download.pytorch.org/whl/cu126"]

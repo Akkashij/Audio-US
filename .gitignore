@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# pyenv
+.python-version
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+*.wav
+run_*.sh
+
+**/__pycache__/
+config/.env
+whisperlivekit/support
+discord_recording_bot
+model-cache
+write
+note_command.md
+deploy/*
